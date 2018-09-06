@@ -1,0 +1,504 @@
+﻿STORED PROCEDURE
+
+
+1. List_of_medal_on_particular_sport
+
+
+Parameters : Sport Name ( e.g. Athletics)
+E.g : List_of_medal_on_perticular_sport(‘Athletics’)
+Return Tuple : Country wise medals on particular sport
+----------------------------------------------------------------------------------
+
+
+CREATE TYPE tuple_sport AS (
+  country_name varchar(32),
+  gold   int,
+  silver   int,
+  bronze   int,
+  total  int
+);
+
+
+CREATE FUNCTION list_of_medal_on_perticular_sport(sportname sport.sport_name%TYPE)
+  RETURNS SETOF tuple_sport AS
+$BODY$
+DECLARE
+
+
+        cou Country%rowtype;
+        play Player%rowtype;
+        spo Sport%rowtype;
+        spo_id Sport.Sport_Id%type;
+        
+        tm Team%rowtype;
+        
+
+
+        reci Individual_Medal%rowtype;
+        rect Team_Medal%rowtype;
+        tm Team%rowtype;
+        gold int;
+        silver int;
+        bronze int;
+        total int;
+        ro tuple_sport;
+
+
+BEGIN
+         
+        FOR spo in SELECT * FROM Sport 
+        LOOP
+                
+                IF (spo.Sport_Name=sportname) then
+                        spo_id = spo.sport_id;
+                END IF;
+
+
+
+
+        END LOOP;
+
+
+        FOR cou IN SELECT * FROM Country 
+        LOOP
+        gold =0;
+        silver = 0;
+        bronze =0;
+
+
+        FOR play IN SELECT * FROM Player where (Country_Id=cou.Country_Id AND Sport_Id=spo_id)
+        LOOP
+
+
+                FOR reci IN SELECT * FROM Individual_Medal where Player_Id=play.Player_Id
+                LOOP
+
+
+                IF (reci.Medal_Type='Gold') then
+                        gold=gold+1;
+                END IF;
+                 IF (reci.Medal_Type='Silver') then
+                        silver=silver+1;
+                END IF;
+                 IF (reci.Medal_Type='Bronze') then
+                        bronze=bronze+1;
+                END IF;
+        
+                END LOOP;
+        END LOOP;
+
+
+        FOR tm IN SELECT * FROM Team where Team.Country_Id=cou.Country_Id
+        LOOP
+
+
+                FOR rect IN SELECT * FROM Team_Medal where Team_Id=tm.Team_Id
+                LOOP
+
+
+                IF (rect.Medal_Type='Gold') then
+                        gold=gold+1;
+                END IF;
+                 IF (rect.Medal_Type='Silver') then
+                        silver=silver+1;
+                END IF;
+                 IF (rect.Medal_Type='Bronze') then
+                        bronze=bronze+1;
+                END IF;
+        
+                END LOOP;
+        END LOOP;
+
+
+        ro.gold=gold;
+        ro.silver=silver;
+        ro.bronze=bronze;
+        ro.total=gold+silver+bronze;
+        ro.country_name=cou.country_name;
+
+
+        RETURN NEXT ro;
+        END LOOP;
+END; 
+$BODY$
+  LANGUAGE plpgsql;
+
+
+-------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2. List_of_Players_of_Country_with_Medals
+
+
+Parameters : Country Id (e.g. USA)
+E.g : List_of_Players_of_Country_with_Medals(‘USA’)
+Return Tuple : Player wise medals of particular country
+--------------------------------------------------------------------------------
+
+
+CREATE TYPE tuple_player AS (
+  player_name  varchar(50),
+  gold   int,
+  silver   int,
+  bronze   int,
+  total  int
+);
+
+
+CREATE OR REPLACE FUNCTION country_wise_player_ranking(country Country.Country_Id%type)
+        RETURNS SETOF tuple_player AS $BODY$
+DECLARE
+        count Country%rowtype;
+        play Player%rowtype;
+        rec Individual_Medal%rowtype;
+        rect Team_Medal%rowtype;
+        tm_ml Team_Members%rowtype;
+        
+        tm Team%rowtype;
+        gold int;
+        silver int;
+        bronze int;
+        ro tuple_player;
+
+
+BEGIN
+
+
+        
+        FOR play IN SELECT * FROM Player where (Country_Id=country)
+        LOOP
+                
+                gold =0;
+                silver = 0;
+                bronze =0;
+
+
+                FOR rec IN SELECT * FROM Individual_Medal where Player_Id=play.Player_Id
+                LOOP
+
+
+                IF (rec.Medal_Type='Gold') then
+                        gold=gold+1;
+                END IF;
+                 IF (rec.Medal_Type='Silver') then
+                        silver=silver+1;
+                END IF;
+                 IF (rec.Medal_Type='Bronze') then
+                        bronze=bronze+1;
+                END IF;
+        
+                END LOOP;
+
+
+                ro.gold=gold;
+                ro.silver=silver;
+                ro.bronze=bronze;
+                ro.total=gold+silver+bronze;
+                IF(ro.total=0) then
+                        continue;
+                END IF;
+                ro.player_name=play.player_name;
+
+
+                RETURN NEXT ro;
+        END LOOP;
+
+
+
+
+        FOR tm IN SELECT * FROM Team where Country_Id=country
+        LOOP
+                
+                gold =0;
+                silver = 0;
+                bronze =0;
+
+
+                FOR rect IN SELECT * FROM Team_Medal where team_Id=tm.team_Id
+                LOOP
+
+
+                IF (rec.Medal_Type='Gold') then
+                        gold=gold+1;
+                END IF;
+                 IF (rec.Medal_Type='Silver') then
+                        silver=silver+1;
+                END IF;
+                 IF (rec.Medal_Type='Bronze') then
+                        bronze=bronze+1;
+                END IF;
+        
+                END LOOP;
+
+
+                FOR tm_ml IN SELECT * FROM Team_Members where team_Id=rect.team_Id
+                LOOP        
+                        ro.gold=gold;
+                        ro.silver=silver;
+                        ro.bronze=bronze;
+                        ro.total=gold+silver+bronze;
+                
+                IF(ro.total=0) then
+                        continue;
+                END IF;
+
+
+                ro.player_name=tm_ml.Player_Id;
+
+
+                RETURN NEXT ro;
+                END LOOP;
+        END LOOP;
+
+
+RETURN;
+END; 
+$BODY$
+LANGUAGE 'plpgsql';
+
+
+
+
+----------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+3. Country_Ranking()
+
+
+Parameters : None
+E.g : Country_Ranking(‘USA’)
+Return Tuple : Country wise medals and total medals
+-----------------------------------------------------------------------------------
+
+
+CREATE TYPE tuple_country AS(
+  country_name varchar(32),
+  gold   int,
+  silver   int,
+  bronze   int,
+  total  int
+);
+
+
+CREATE FUNCTION country_ranking()
+  RETURNS SETOF tuple_country AS
+$BODY$
+
+
+DECLARE
+        cou Country%rowtype;
+        play Player%rowtype;
+        tm Team%rowtype;
+        
+        reci Individual_Medal%rowtype;
+        rect Team_Medal%rowtype;
+        gold int;
+        silver int;
+        bronze int;
+        total int;
+        ro tuple_country;
+
+
+BEGIN
+
+
+        FOR cou IN SELECT * FROM Country 
+        LOOP
+        gold =0;
+        silver = 0;
+        bronze =0;
+
+
+        FOR play IN SELECT * FROM Player where Country_Id=cou.Country_Id
+        LOOP
+
+
+                FOR reci IN SELECT * FROM Individual_Medal where Player_Id=play.Player_Id
+                LOOP
+
+
+                IF (reci.Medal_Type='Gold') then
+                        gold=gold+1;
+                END IF;
+                 IF (reci.Medal_Type='Silver') then
+                        silver=silver+1;
+                END IF;
+                 IF (reci.Medal_Type='Bronze') then
+                        bronze=bronze+1;
+                END IF;
+        
+                END LOOP;
+        END LOOP;
+
+
+        FOR tm IN SELECT * FROM Team where Team.Country_Id=cou.Country_Id
+        LOOP
+
+
+                FOR rect IN SELECT * FROM Team_Medal where Team_Id=tm.Team_Id
+                LOOP
+
+
+                IF (rect.Medal_Type='Gold') then
+                        gold=gold+1;
+                END IF;
+                 IF (rect.Medal_Type='Silver') then
+                        silver=silver+1;
+                END IF;
+                 IF (rect.Medal_Type='Bronze') then
+                        bronze=bronze+1;
+                END IF;
+        
+                END LOOP;
+        END LOOP;
+
+
+        ro.gold:=gold;
+        ro.silver:=silver;
+        ro.bronze:=bronze;
+        ro.total:=gold+silver+bronze;
+        ro.country_name:=cou.country_name;
+
+
+        RETURN NEXT ro;
+        END LOOP;
+END; 
+
+
+$BODY$
+  LANGUAGE plpgsql;
+
+
+
+
+
+
+--------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Triggers 
+
+
+
+
+Trigger Condition : You Can’t Delete Any Country by query
+
+
+E.g : DELETE FROM Country WHERE Country_Id=’CAN’;
+O/P : You can not delete a country;
+-----------------------------------------------------------------------------------
+
+
+CREATE TRIGGER del_country
+  BEFORE DELETE
+  ON country
+  FOR EACH ROW
+  EXECUTE PROCEDURE olympic.on_del();
+
+
+
+
+
+
+
+
+CREATE OR REPLACE FUNCTION on_del()
+  RETURNS trigger AS
+$BODY$
+
+
+BEGIN
+
+
+        IF(TG_OP='DELETE') THEN
+        RAISE NOTICE 'You can not delete a country';
+        RETURN OLD;
+        END IF;
+
+
+        RETURN NULL;
+        
+END;
+$BODY$
+  LANGUAGE plpgsql;
+
+
+-------------------------------------------------------------------------------------

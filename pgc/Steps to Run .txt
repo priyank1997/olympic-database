@@ -1,0 +1,13 @@
+﻿Run Given Executable by,
+>> ./a.out
+>> DBNAME: 201501185
+>> USERNAME: 201501185
+Connection Successful
+Set your search path :
+>>olympic
+
+
+Options
+1. Update, INSERT and DELETE Queries
+2. SELECT Queries
+3. Anything else for Exit

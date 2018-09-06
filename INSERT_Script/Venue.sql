@@ -1,0 +1,14 @@
+INSERT INTO Venue(Venue_Id,Venue_Name,Capacity) VALUES ('V01','Amazonia Arena','40,549');
+INSERT INTO Venue(Venue_Id,Venue_Name,Capacity) VALUES ('V03','Copacabana Stadium','12,000');
+INSERT INTO Venue(Venue_Id,Venue_Name,Capacity) VALUES ('V04','Corinthinians Arena','48,234');
+INSERT INTO Venue(Venue_Id,Venue_Name,Capacity) VALUES ('V05','Fonte Nova Arena','51,700');
+INSERT INTO Venue(Venue_Id,Venue_Name,Capacity) VALUES ('V06','Mane Garrincha  Stadium','69,394');
+INSERT INTO Venue(Venue_Id,Venue_Name,Capacity) VALUES ('V07','Maracana Stadium','74,738');
+INSERT INTO Venue(Venue_Id,Venue_Name,Capacity) VALUES ('V08','Maracanazinho Arena','12,000');
+INSERT INTO Venue(Venue_Id,Venue_Name,Capacity) VALUES ('V09','Mineirao','58,170');
+INSERT INTO Venue(Venue_Id,Venue_Name,Capacity) VALUES ('V10','Olympic Hockey Centre','15,000');
+INSERT INTO Venue(Venue_Id,Venue_Name,Capacity) VALUES ('V11','Olympic Stadium','60,000');
+INSERT INTO Venue(Venue_Id,Venue_Name,Capacity) VALUES ('V12','Olympic Tennis Centre','19,750');
+INSERT INTO Venue(Venue_Id,Venue_Name,Capacity) VALUES ('V14','Rio Olympic Arena','12,000');
+INSERT INTO Venue(Venue_Id,Venue_Name,Capacity) VALUES ('V15','Riocentro - Pavilion 4','6,500');
+INSERT INTO Venue(Venue_Id,Venue_Name,Capacity) VALUES ('V16','Riocentro - Pavilion 6','9,000');
